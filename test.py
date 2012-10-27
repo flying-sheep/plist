@@ -1,5 +1,6 @@
 import sys, os
 from difflib import unified_diff
+from datetime import datetime, timezone
 from collections import OrderedDict
 from tempfile import NamedTemporaryFile
 from runpy import run_module
@@ -69,6 +70,7 @@ class TestPlist:
 			'int':     5,
 			'bytes':   b'\x00\x01\x02\x03\x04\x05\x06',
 			'string':  'world',
+			'date':    datetime.now(timezone.utc),
 			'list':    [0, 1, 2, 3, 4, 5],
 			'nesting': [['is', 'possible'], 'too', ['of', 'course']],
 			'dict':    {'example': 'nesting'},

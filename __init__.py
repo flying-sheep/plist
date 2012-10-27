@@ -27,11 +27,13 @@ but can also throw an IndexError if dicts have incomplete key/value pairs.
 
 import re
 from io import StringIO
-from datetime import date, datetime
+from datetime import datetime
 from itertools import tee
 from collections import OrderedDict
 from collections.abc import Sequence, Mapping
 from xml.etree import ElementTree as etree
+
+from .iso8601 import parse_date
 
 __all__ = ['load', 'loads', 'fromtree', 'dump', 'dumps', 'totree']
 
@@ -118,10 +120,9 @@ TYPES_STATIC = {
 }
 
 TYPES_WRAP = {
-	str:   'string',
-	int:   'integer',
-	float: 'real', #needs repr
-	date:  'date',
+	str:      'string',
+	int:      'integer',
+	float:    'real', #needs repr
 }
 
 class PListBuilder(etree.TreeBuilder):
@@ -147,6 +148,8 @@ class PListBuilder(etree.TreeBuilder):
 			return self.tag(TYPES_STATIC[data])
 		elif typ:
 			return self.tag(typ, data if typ != 'real' else repr(data))
+		elif isinstance(data, datetime):
+			return self.tag('date', data.isoformat())
 		elif isinstance(data, bytes):
 			self.start('data')
 			self.tag(None, WHITESPACE_RE.sub('', _b64.encodeb2s(data)))
@@ -197,7 +200,7 @@ TAGS_STATIC = {
 TAGS_TEXT = {
 	'integer': int,
 	'real':    float,
-	'date':    datetime.fromtimestamp,
+	'date':    parse_date,
 	'data':    _b64.decodes2b,
 	'string':  str, #no-op
 }
